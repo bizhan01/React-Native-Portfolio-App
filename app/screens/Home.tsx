@@ -43,7 +43,7 @@ const Home = () => {
 					}
 				} style={styles.profileImage} />
 			<Text style={styles.header}>
-				Manish Prajapat
+				Bizhan
 			</Text>
 			<Text style={styles.subheader}>
 				React Native Developer
