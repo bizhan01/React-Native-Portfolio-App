@@ -18,8 +18,8 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: { backgroundColor: '#142748ff', },
-        tabBarActiveTintColor:'black',
-        tabBarInactiveTintColor: 'white',
+        tabBarActiveTintColor:'white',
+        tabBarInactiveTintColor: '#9fa5b2ff',
         tabBarIcon: ({ color, size }) => {
           let iconName: string = 'home';
 
