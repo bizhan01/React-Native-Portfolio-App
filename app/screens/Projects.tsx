@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient'; // Install: expo install expo-linear-gradient
-import React, { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	Animated,
 	Dimensions,
+	Easing,
 	FlatList,
 	Image,
 	Linking,
@@ -64,15 +65,19 @@ const projectsData = [
 
 const Projects = () => {
   const [expandedProject, setExpandedProject] = useState(null);
-  const [scaleAnim] = useState(new Animated.Value(0.9));
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic)
+    }).start();
+  }, []);
 
   const handleProjectPress = (projectId) => {
     setExpandedProject(expandedProject === projectId ? null : projectId);
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: true,
-    }).start();
   };
 
   const openLink = (url) => {
@@ -87,93 +92,119 @@ const Projects = () => {
         style={[
           styles.projectCard,
           {
-            transform: [{ scale: isExpanded ? 1.02 : 1 }],
-            height: isExpanded ? 'auto' : 200,
+            opacity: fadeAnim,
+            transform: [
+              {
+                translateY: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0]
+                })
+              }
+            ]
           }
         ]}
       >
-        <TouchableOpacity onPress={() => handleProjectPress(item.id)} activeOpacity={0.9}>
-          <LinearGradient
-            colors={['#112240', '#0a192f']}
-            style={styles.gradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            {/* Project Image */}
-            <Image source={{ uri: item.image }} style={styles.projectImage} />
+        <LinearGradient
+          colors={['#112240', '#0a192f']}
+          style={styles.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          {/* Project Image */}
+          {/* <Image source={{ uri: item.image }} style={styles.projectImage} /> */}
+          
+          {/* Project Header */}
+          <View style={styles.projectHeader}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.projectTitle}>{item.title}</Text>
+              <View style={[styles.statusBadge, 
+                { backgroundColor: item.status === 'Completed' ? '#64ffda' : '#ffd700' }]}>
+                <Text style={styles.statusText}>{item.status}</Text>
+              </View>
+            </View>
             
-            {/* Project Header */}
-            <View style={styles.projectHeader}>
-              <View style={styles.titleContainer}>
-                <Text style={styles.projectTitle}>{item.title}</Text>
-                <View style={[styles.statusBadge, 
-                  { backgroundColor: item.status === 'Completed' ? '#64ffda' : '#ffd700' }]}>
-                  <Text style={styles.statusText}>{item.status}</Text>
-                </View>
-              </View>
-              
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#ffd700" />
-                <Text style={styles.ratingText}>{item.rating}</Text>
-              </View>
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={16} color="#ffd700" />
+              <Text style={styles.ratingText}>{item.rating}</Text>
             </View>
+          </View>
 
-            {/* Project Description */}
-            <Text 
-              style={styles.projectDescription} 
-              numberOfLines={isExpanded ? undefined : 2}
-            >
-              {item.description}
-            </Text>
+          {/* Project Description - Always visible */}
+          <Text style={styles.projectDescription} numberOfLines={3}>
+            {item.description}
+          </Text>
 
-            {/* Technologies */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={styles.technologiesContainer}
-            >
-              {item.technologies.map((tech, techIndex) => (
-                <View key={techIndex} style={styles.techBox}>
-                  <Text style={styles.techText}>{tech}</Text>
-                </View>
-              ))}
-            </ScrollView>
-
-            {/* Action Buttons - Only show when expanded */}
-            {isExpanded && (
-              <View style={styles.actionButtons}>
-                {item.githubUrl && (
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={() => openLink(item.githubUrl)}
-                  >
-                    <Ionicons name="logo-github" size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>GitHub</Text>
-                  </TouchableOpacity>
-                )}
-                
-                {item.liveUrl && (
-                  <TouchableOpacity 
-                    style={[styles.actionButton, styles.liveButton]}
-                    onPress={() => openLink(item.liveUrl)}
-                  >
-                    <Ionicons name="globe" size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>Live Demo</Text>
-                  </TouchableOpacity>
-                )}
+          {/* Technologies - Always visible */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.technologiesContainer}
+          >
+            {item.technologies.map((tech, techIndex) => (
+              <View key={techIndex} style={styles.techBox}>
+                <Text style={styles.techText}>{tech}</Text>
               </View>
+            ))}
+          </ScrollView>
+
+          {/* Action Buttons - Always visible but compact */}
+          <View style={styles.actionButtons}>
+            {item.githubUrl && (
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => openLink(item.githubUrl)}
+              >
+                <Ionicons name="logo-github" size={16} color="#fff" />
+                <Text style={styles.actionButtonText}>Code</Text>
+              </TouchableOpacity>
             )}
+            
+            {item.liveUrl && (
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.liveButton]}
+                onPress={() => openLink(item.liveUrl)}
+              >
+                <Ionicons name="globe" size={16} color="#fff" />
+                <Text style={styles.actionButtonText}>Live</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-            {/* Expand Indicator */}
-            <View style={styles.expandIndicator}>
-              <Ionicons 
-                name={isExpanded ? "chevron-up" : "chevron-down"} 
-                size={20} 
-                color="#64ffda" 
-              />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
+          {/* Expandable Details */}
+          {isExpanded && (
+            <Animated.View style={styles.expandedContent}>
+              <Text style={styles.fullDescription}>{item.description}</Text>
+              
+              {/* Additional project details can go here */}
+              <View style={styles.projectDetails}>
+                <View style={styles.detailItem}>
+                  <Ionicons name="time" size={16} color="#64ffda" />
+                  <Text style={styles.detailText}>3 months development</Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Ionicons name="people" size={16} color="#64ffda" />
+                  <Text style={styles.detailText}>Solo project</Text>
+                </View>
+              </View>
+            </Animated.View>
+          )}
+
+          {/* Expand/Collapse Button */}
+          <TouchableOpacity 
+            style={styles.expandButton}
+            onPress={() => handleProjectPress(item.id)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.expandButtonText}>
+              {isExpanded ? 'Show Less' : 'Read More'}
+            </Text>
+            <Ionicons 
+              name={isExpanded ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color="#64ffda" 
+            />
+          </TouchableOpacity>
+        </LinearGradient>
       </Animated.View>
     );
   };
@@ -181,10 +212,13 @@ const Projects = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.headerContainer}>
+      <LinearGradient
+        colors={['#0a192f', '#112240']}
+        style={styles.headerContainer}
+      >
         <Text style={styles.header}>My Projects</Text>
-        <Text style={styles.subHeader}>A collection of my recent work</Text>
-      </View>
+        <Text style={styles.subHeader}>A collection of my recent work and accomplishments</Text>
+      </LinearGradient>
 
       {/* Projects List */}
       <FlatList
@@ -193,23 +227,34 @@ const Projects = () => {
         renderItem={renderProjectItem}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <Text style={styles.projectsCount}>
+            {projectsData.length} Projects
+          </Text>
+        }
       />
 
       {/* Stats Footer */}
-      <View style={styles.statsFooter}>
+      <LinearGradient
+        colors={['#112240', '#0a192f']}
+        style={styles.statsFooter}
+      >
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{projectsData.length}+</Text>
+          <Ionicons name="rocket" size={24} color="#64ffda" />
+          <Text style={styles.statNumber}>{projectsData.length}</Text>
           <Text style={styles.statLabel}>Projects</Text>
         </View>
         <View style={styles.statItem}>
+          <Ionicons name="trophy" size={24} color="#64ffda" />
           <Text style={styles.statNumber}>100%</Text>
-          <Text style={styles.statLabel}>Success Rate</Text>
+          <Text style={styles.statLabel}>Success</Text>
         </View>
         <View style={styles.statItem}>
+          <Ionicons name="heart" size={24} color="#64ffda" />
           <Text style={styles.statNumber}>∞</Text>
           <Text style={styles.statLabel}>Passion</Text>
         </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };
@@ -220,19 +265,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a192f',
   },
   headerContainer: {
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#0a192f',
+    padding: 25,
+    paddingTop: 50,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   header: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#ccd6f6',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   subHeader: {
     fontSize: 16,
     color: '#8892b0',
+    lineHeight: 22,
+  },
+  projectsCount: {
+    fontSize: 18,
+    color: '#64ffda',
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   listContainer: {
     padding: 20,
@@ -240,20 +294,20 @@ const styles = StyleSheet.create({
   },
   projectCard: {
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 25,
     overflow: 'hidden',
-    shadowColor: '#64ffda',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowRadius: 15,
+    elevation: 8,
   },
   gradient: {
     padding: 20,
   },
   projectImage: {
     width: '100%',
-    height: 150,
+    height: 180,
     borderRadius: 15,
     marginBottom: 15,
   },
@@ -261,19 +315,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   titleContainer: {
     flex: 1,
   },
   projectTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#ccd6f6',
     marginBottom: 8,
   },
   statusBadge: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
     alignSelf: 'flex-start',
@@ -287,18 +341,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    padding: 5,
+    padding: 6,
     borderRadius: 8,
+    marginLeft: 10,
   },
   ratingText: {
     color: '#ffd700',
     marginLeft: 4,
     fontWeight: '600',
+    fontSize: 12,
   },
   projectDescription: {
     fontSize: 14,
-    color: '#8892b0',
+    color: '#a8b2d1',
     lineHeight: 20,
+    marginBottom: 15,
+  },
+  fullDescription: {
+    fontSize: 14,
+    color: '#a8b2d1',
+    lineHeight: 22,
     marginBottom: 15,
   },
   technologiesContainer: {
@@ -306,31 +368,31 @@ const styles = StyleSheet.create({
   },
   techBox: {
     backgroundColor: 'rgba(100, 255, 218, 0.1)',
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#64ffda',
+    borderColor: '#64ffda20',
   },
   techText: {
     color: '#64ffda',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    gap: 10,
     marginBottom: 15,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#333',
-    padding: 12,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    gap: 8,
+    padding: 8,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    gap: 6,
   },
   liveButton: {
     backgroundColor: '#64ffda',
@@ -338,16 +400,47 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#fff',
     fontWeight: '600',
+    fontSize: 12,
   },
-  expandIndicator: {
+  expandButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    justifyContent: 'center',
+    padding: 10,
+    backgroundColor: 'rgba(100, 255, 218, 0.1)',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#64ffda30',
+  },
+  expandButtonText: {
+    color: '#64ffda',
+    fontWeight: '600',
+    marginRight: 8,
+    fontSize: 12,
+  },
+  expandedContent: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#64ffda20',
+  },
+  projectDetails: {
+    marginTop: 10,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailText: {
+    color: '#8892b0',
+    fontSize: 12,
+    marginLeft: 8,
   },
   statsFooter: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    padding: 20,
-    backgroundColor: '#112240',
+    padding: 25,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
@@ -355,13 +448,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#64ffda',
-    marginBottom: 5,
+    marginVertical: 5,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#8892b0',
     fontWeight: '600',
   },
