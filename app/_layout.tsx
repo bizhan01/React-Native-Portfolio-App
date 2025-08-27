@@ -1,29 +1,43 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useTheme } from '@react-navigation/native';
+import React from 'react';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+// Import screens
+import Home from '../app/(tabs)/index';
+import Projects from '../app/(tabs)/Projects';
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+const Tab = createBottomTabNavigator();
+
+export default function TabsLayout() {
+  const theme = useTheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarStyle: { backgroundColor: theme.colors.background },
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: 'gray',
+        tabBarIcon: ({ color, size }) => {
+          let iconName: string = 'home';
+
+          switch (route.name) {
+            case 'Home':
+              iconName = 'home-outline';
+              break;
+            case 'Projects':
+              iconName = 'rocket';
+              break;
+          }
+
+          return <Ionicons name={iconName as any} size={size} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Projects" component={Projects} />
+    </Tab.Navigator>
   );
 }
