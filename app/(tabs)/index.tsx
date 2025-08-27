@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install: expo install @expo/vector-icons
 import React, { useEffect, useState } from 'react';
 import {
-	Animated,
-	Dimensions,
-	Easing,
-	Image,
-	Linking,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -27,8 +27,8 @@ const technologies = [
 ];
 
 const socialLinks = [
-  { name: 'GitHub', url: 'https://github.com', icon: 'logo-github', color: '#333' },
-  { name: 'LinkedIn', url: 'https://linkedin.com', icon: 'logo-linkedin', color: '#0077b5' },
+  { name: 'GitHub', url: 'https://github.com/bizhan01', icon: 'logo-github', color: '#333' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/rahmatullah-bizhan-b7a0331b0', icon: 'logo-linkedin', color: '#0077b5' },
   { name: 'Twitter', url: 'https://twitter.com', icon: 'logo-twitter', color: '#1da1f2' },
   { name: 'Portfolio', url: 'https://yourportfolio.com', icon: 'globe', color: '#007acc' }
 ];
@@ -141,7 +141,7 @@ const Home = () => {
           />
           <View style={styles.profileTextContainer}>
             <Text style={styles.header}>Bizhan</Text>
-            <Text style={styles.subheader}>React Native Developer</Text>
+            <Text style={styles.subheader}>Full Stack Developer</Text>
             <Text style={styles.tagline}>Building beautiful mobile experiences</Text>
           </View>
         </View>

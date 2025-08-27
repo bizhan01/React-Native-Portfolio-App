@@ -17,9 +17,9 @@ export default function TabsLayout() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: theme.colors.background },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { backgroundColor: '#142748ff', },
+        tabBarActiveTintColor:'black',
+        tabBarInactiveTintColor: 'white',
         tabBarIcon: ({ color, size }) => {
           let iconName: string = 'home';
 
